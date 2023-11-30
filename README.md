@@ -1,0 +1,1 @@
+Telegram бот для анализа отзывов wildberries и ozon
