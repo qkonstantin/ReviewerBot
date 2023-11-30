@@ -1,17 +1,64 @@
 import requests
+import regex
+from useragent import UserAgentGenerator
 
-# URL страницы с отзывами
-url = 'https://feedbacks2.wb.ru/feedbacks/v1/14195922'
+class FeedbackParserWB:
+    def __init__(self, url):
+        self.url = url
 
-# Заголовки для имитации браузера
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+    def get_item_id(self):
+        pattern = regex.compile(r'catalog/(\d+)/detail')
+        match = pattern.search(self.url)
+        if match:
+            item_id = match.group(1)
+            return item_id
+        else:
+            print("Не удалось найти id товара")
 
-# Отправка HTTP-запроса и получение содержимого страницы
-response = requests.get(url, headers=headers)
-data = response.json()
+    def get_item_root(self):
+        item_id = self.get_item_id()
+        url = f'https://card.wb.ru/cards/v1/detail?appType=1&curr=rub&dest=-1180979&spp=29&nm={item_id}'
+        user_agent = UserAgentGenerator().get_random_user_agent()
+        response = requests.get(url, headers=user_agent)
+        data = response.json()
+        root = data["data"]["products"][0]["root"]
+        return root
 
-# извлечение текста отзывов
-reviews_text = [review['text'] for review in data['feedbacks']]
+    def get_item_name(self):
+        item_id = self.get_item_id()
+        url = f'https://card.wb.ru/cards/v1/detail?appType=1&curr=rub&dest=-1180979&spp=29&nm={item_id}'
+        user_agent = UserAgentGenerator().get_random_user_agent()
+        response = requests.get(url, headers=user_agent)
+        data = response.json()
+        name = data["data"]["products"][0]["name"]
+        return name
 
-print(reviews_text)
+    def get_item_feedbacks(self):
+        root = self.get_item_root()
+        user_agent_2 = UserAgentGenerator().get_random_user_agent()
+        url = f'https://feedbacks1.wb.ru/feedbacks/v1/{root}'
+        response = requests.get(url, headers=user_agent_2)
+        data = response.json()
+        if 'feedbacks' in data and data['feedbacks'] is not None:
+            if any('text' in review for review in data['feedbacks']):
+                reviews_text = [review['text'] for review in data['feedbacks']]
+                return reviews_text
+            else:
+                print('Ошибка: ключ "text" отсутствует во всех словарях.')
+        else:
+            url = f'https://feedbacks2.wb.ru/feedbacks/v1/{root}'
+            response = requests.get(url, headers=user_agent_2)
+            data = response.json()
+            reviews_text = [review['text'] for review in data['feedbacks']]
+            return reviews_text
+
+    def get_formatted_feedbacks(self):
+        reviews_text = self.get_item_feedbacks()
+        name = self.get_item_name()
+        formatted_text = "Напиши основные плюсы и минусы товара {} исходя из отзывов:".format(name)
+        for review in reviews_text:
+            if len(formatted_text) + len(review) <= 4000:
+                formatted_text += "\n" + review
+            else:
+                break
+        return formatted_text
