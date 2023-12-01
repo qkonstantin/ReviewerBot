@@ -88,7 +88,8 @@ class FeedbackParserOZN:
         if not reviews_text or not name:
             return "Не удалось получить отредактированные отзывы. Попробуйте еще раз."
         logging.info("Редактирование отзывов")
-        formatted_text = "Напиши основные плюсы и минусы товара {} исходя из отзывов:".format(name)
+        formatted_text = ("Предоставь ответ в текстовом формате, без выделений и прочего."
+                          "Напиши основные плюсы и минусы товара {} исходя из отзывов:").format(name)
         for review in reviews_text:
             if len(formatted_text) + len(review) <= 4000:
                 formatted_text += "\n" + review

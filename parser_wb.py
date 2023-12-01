@@ -55,7 +55,8 @@ class FeedbackParserWB:
     def get_formatted_feedbacks(self):
         reviews_text = self.get_item_feedbacks()
         name = self.get_item_name()
-        formatted_text = "Напиши основные плюсы и минусы товара {} исходя из отзывов:".format(name)
+        formatted_text = ("Предоставь ответ в текстовом формате, без выделений и прочего."
+                          "Напиши основные плюсы и минусы товара {} исходя из отзывов:").format(name)
         for review in reviews_text:
             if len(formatted_text) + len(review) <= 4000:
                 formatted_text += "\n" + review
