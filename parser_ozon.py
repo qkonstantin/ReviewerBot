@@ -44,18 +44,18 @@ class FeedbackParserOZN:
         soup = BeautifulSoup(html_content, 'html.parser')
         logging.info("Получение отзывов из HTML")
         all_reviews = []
-        characteristics = soup.find_all('div', class_='vp7 p5w')
+        characteristics = soup.find_all('div', class_='v3o wo1')
 
         for characteristic in characteristics:
-            characteristic_elemets = characteristic.find_all('div', class_='p8v')
+            characteristic_elemets = characteristic.find_all('div', class_='vo4')
             for characteristic_elemet in characteristic_elemets:
-                characteristic = characteristic_elemet.find('div', class_='pv8')
+                characteristic = characteristic_elemet.find('div', class_='o4v')
                 if characteristic:
                     characteristic = characteristic.get_text(strip=True)
                 else:
                     characteristic = 'Комментарий'
 
-                text_element = characteristic_elemet.find('span', class_='v7p')
+                text_element = characteristic_elemet.find('span', class_='ov4')
                 if text_element:
                     text = text_element.get_text(strip=True)
                 else:
@@ -70,8 +70,7 @@ class FeedbackParserOZN:
 
         logging.info("Извлечение наименования товара из HTML")
         soup = BeautifulSoup(html_content, 'html.parser')
-        item_name = soup.find('div', class_='n21')
-        print(item_name)
+        item_name = soup.find('div', class_='ln7')
 
         if item_name:
             name = item_name.get_text(strip=True).split(',')[0]
@@ -88,7 +87,7 @@ class FeedbackParserOZN:
         if not reviews_text or not name:
             return "Не удалось получить отредактированные отзывы. Попробуйте еще раз."
         logging.info("Редактирование отзывов")
-        formatted_text = "Напиши основные плюсы и минусы товара {} исходя из отзывов:".format(name)
+        formatted_text = "Предоставь ответ в текстовом формате без звёздочек и прочего. Напиши основные плюсы и минусы товара {} исходя из отзывов:".format(name)
         for review in reviews_text:
             if len(formatted_text) + len(review) <= 4000:
                 formatted_text += "\n" + review
