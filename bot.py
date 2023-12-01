@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+import threading
 
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.types import Message, ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, CallbackQuery
@@ -56,9 +57,6 @@ async def ask_link(callback: CallbackQuery, state: FSMContext):
     )
 
 
-import threading
-
-
 @form_router.message(States.process_link)
 async def process_link(message: Message, state: FSMContext):
     await state.set_state(States.ask_for_another_link)
@@ -97,7 +95,7 @@ async def process_link(message: Message, state: FSMContext):
     gpt_instance = GPT(question_str)
 
     for i in range(6, 11):
-        await asyncio.sleep(5.8)
+        await asyncio.sleep(6)
         percentage = i * 10
         progress = "[" + "█" * i + " " * (5 - i) + "]"
         await progress_message.edit_text(f"Анализирую отзывы: {percentage}% {progress}")
