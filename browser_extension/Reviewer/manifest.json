@@ -1,0 +1,11 @@
+{
+  "manifest_version": 2,
+  "name": "Reviewer",
+  "version": "1.0",
+  "permissions": [
+    "activeTab"
+  ],
+  "browser_action": {
+    "default_popup": "popup.html"
+    }
+  }

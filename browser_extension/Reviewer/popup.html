@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Link Sender</title>
+  <meta charset="UTF-8">
+  <style>
+    @font-face {
+      font-family: 'Oceanic';
+      src: url('fonts/Kreadon.ttf') format('opentype');
+    }
+    body {
+      width: 300px;
+      background-color: #1a1a1a;
+      color: white;
+      font-family: 'Oceanic', sans-serif;
+    }
+    button {
+      background-color: grey;
+      color: white;
+      border-radius: 5px;
+      padding: 5px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      width: 100%;
+	  font-family: 'Oceanic', sans-serif;
+    }
+    .status {
+      padding: 5px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      background-color: green;
+	  text-align: center;
+	  line-height: 1.5;
+    }
+    .result {
+      padding: 5px;
+      background-color: grey;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      display: none; /* Скрыть элемент изначально */
+    }
+  </style>
+</head>
+<body>
+  <button id="sendLinkButton">Получить отзывы</button>
+  <div class="status" id="status">Нажмите на кнопку выше, чтобы получить отзывы</div>
+  <div class="result" id="result"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
