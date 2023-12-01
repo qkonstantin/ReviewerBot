@@ -63,3 +63,17 @@ class FeedbackParserWB:
             else:
                 break
         return formatted_text
+
+    def get_formatted_feedbacks_html(self):
+        reviews_text = self.get_item_feedbacks()
+        name = self.get_item_name()
+        formatted_text = ("Предоставь ответ в формате HTML. Текст белый."
+                          "Введение не нужно писать, "
+                          "твой ответ должен состоять только из перечесления сначала плюсов, потом минусов."
+                          "Напиши основные плюсы и минусы товара {} исходя из отзывов:").format(name)
+        for review in reviews_text:
+            if len(formatted_text) + len(review) <= 4000:
+                formatted_text += "\n" + review
+            else:
+                break
+        return formatted_text

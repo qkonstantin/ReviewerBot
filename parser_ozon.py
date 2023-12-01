@@ -96,3 +96,21 @@ class FeedbackParserOZN:
             else:
                 break
         return formatted_text
+
+    def get_formatted_reviews_html(self):
+        reviews_text = self.get_reviews_from_html()
+
+        name = self.get_item_name()
+        if not reviews_text or not name:
+            return "Не удалось получить отредактированные отзывы. Попробуйте еще раз."
+        logging.info("Редактирование отзывов")
+        formatted_text = ("Предоставь ответ в формате HTML. Текст белый."
+                          "Введение не нужно писать, "
+                          "твой ответ должен состоять только из перечесления сначала плюсов, потом минусов."
+                          "Напиши основные плюсы и минусы товара {} исходя из отзывов:").format(name)
+        for review in reviews_text:
+            if len(formatted_text) + len(review) <= 4000:
+                formatted_text += "\n" + review
+            else:
+                break
+        return formatted_text
