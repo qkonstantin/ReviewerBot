@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+import threading
 
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.types import Message, ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, CallbackQuery
@@ -50,7 +51,8 @@ async def ask_link(callback: CallbackQuery, state: FSMContext):
 async def ask_link(callback: CallbackQuery, state: FSMContext):
     await state.set_state(States.process_link)
     await callback.message.answer(
-        "Извини, но пока я не обладаю большим функционалом, поэтому не могу тебе помочь с чем-нибудь ещё. Если понадоблюсь понадобится анализ отзывов - дай знать, я рядом!",
+        "Извини, но пока я не обладаю большим функционалом, поэтому не могу тебе помочь с чем-нибудь ещё. Если "
+        "понадоблюсь понадобится анализ отзывов - дай знать, я рядом!",
         reply_markup=ReplyKeyboardRemove(),
     )
 
@@ -63,37 +65,44 @@ async def process_link(message: Message, state: FSMContext):
 
     progress_message = await message.answer("Анализирую отзывы: 0% [          ]")
 
-    # Отображаем 50% перед обработкой данных
-    for i in range(1, 3):
-        await asyncio.sleep(1)
+    def extract_reviews():
+        nonlocal text
+        if url.split('/')[2] == 'www.ozon.ru' or url.split('/')[2] == 'ozon.ru':
+            extractor = FeedbackParserOZN(url)
+            item_name = extractor.get_item_name()
+            text = extractor.get_formatted_reviews()
+            if not item_name or not text:
+                progress_message.edit_text("Не удалось получить все необходимые данные. Попробуйте еще раз.")
+                return
+        elif url.split('/')[2] == 'www.wildberries.ru':
+            extractor = FeedbackParserWB(url)
+            text = extractor.get_formatted_feedbacks()
+
+    thread = threading.Thread(target=extract_reviews)
+    thread.start()
+
+    for i in range(1, 6):
+        await asyncio.sleep(3.5)
         percentage = i * 10
         progress = "[" + "█" * i + " " * (5 - i) + "]"
         await progress_message.edit_text(f"Анализирую отзывы: {percentage}% {progress}")
 
-    if url.split('/')[2] == 'www.ozon.ru' or url.split('/')[2] == 'ozon.ru':
-        extractor = FeedbackParserOZN(url)
-        item_name = extractor.get_item_name()
-        text = extractor.get_formatted_reviews()
-        if not item_name or not text:
-            await progress_message.edit_text("Не удалось получить все необходимые данные. Попробуйте еще раз.")
-            return
-    elif url.split('/')[2] == 'www.wildberries.ru':
-        extractor = FeedbackParserWB(url)
-        text = extractor.get_formatted_feedbacks()
+    thread.join()  # Ждем завершения потока
 
     question_str = text
-    logging.info(question_str)
+    print(question_str)
+    logging.info('Передача отзывов Chat GPT')
     gpt_instance = GPT(question_str)
 
-    # Отображаем ещё 50% после обработки данных
-    for i in range(4, 11):
-        await asyncio.sleep(4)
+    for i in range(6, 11):
+        await asyncio.sleep(6)
         percentage = i * 10
-        progress = "[" + "█" * (i - 5) + " " * (5 - (i - 5)) + "]"
+        progress = "[" + "█" * i + " " * (5 - i) + "]"
         await progress_message.edit_text(f"Анализирую отзывы: {percentage}% {progress}")
 
     result = await gpt_instance.ask_gpt_async()
-    await progress_message.edit_text(str(result))  # Преобразуем результат в строку
+    result_text = str(result)
+    await progress_message.edit_text(result_text)
 
     builder = InlineKeyboardBuilder()
     builder.button(text=f'Да, пожалуй', callback_data='да')
